@@ -14,6 +14,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.aibilitymapview = (AibilitysView) findViewById(R.id.aibilitymapview);
-        aibilitymapview.setData(new int[]{65, 70, 80, 70, 80, 80, });
+        aibilitymapview.setData(new Object[]{65, 70, 80, 70, 80, 80 });
     }
 }

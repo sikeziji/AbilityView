@@ -18,7 +18,7 @@ public class AibilitysView extends View {
 
     private Paint linePaint;//画线的笔
     private Paint textPaint;//画文字的笔
-    private int[] allAbility;
+    private Object[] allAbility;
 
     private int n;    //边的数量或者能力的个数
     private float intervalCount;//间隔数量，把半径分为几段
@@ -54,12 +54,11 @@ public class AibilitysView extends View {
      * 初始化点的位置
      */
     private void initPoints() {
-        if (pointArrayList == null){
+        if (pointArrayList == null) {
             pointArrayList = new ArrayList<>();
-        }else {
+        } else {
             pointArrayList.clear();
         }
-        Log.e("pointArrayList" , pointArrayList.size() +"");
         float x;
         float y;
         for (int i = 0; i < intervalCount; i++) {
@@ -74,8 +73,6 @@ public class AibilitysView extends View {
             }
             pointArrayList.add(points);
         }
-        Log.e("points" , pointArrayList.get(0).size() +"");
-
     }
 
     /**
@@ -109,26 +106,32 @@ public class AibilitysView extends View {
         } else {
             n = allAbility.length;
         }
-        Log.e("n : " , n +"");
         R = dp2pxF(getContext(), 100);
         intervalCount = 4; //有四层
         angle = (float) ((2 * Math.PI) / n); //2π是一周，除以n是算出平均每一个的角度是多少
-        Log.e("angle  " , angle +"");
 
 
-        //拿到屏幕的宽高
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        //控件设置为正方向
-        viewHight = screenWidth;
-        viewWidth = screenWidth;
+        /**
+         *
+         * 此方法默认获取的是整个手机的宽度和高度；无论如何调节控件或父控件的宽度都不可能实现，Size的改变
+         *
+         *
+         //拿到屏幕的宽高
+         int screenWidth = getResources().getDisplayMetrics().widthPixels;
+         //控件设置为正方向
+         viewHight = screenWidth;
+         viewWidth = screenWidth;
+         */
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        //设置控件的最终视图大小
+        viewWidth = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+        viewHight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
         setMeasuredDimension(viewWidth, viewHight);
+//        //设置控件的最终视图大小
+//        setMeasuredDimension(viewWidth, viewHight);
     }
 
     @Override
@@ -154,6 +157,32 @@ public class AibilitysView extends View {
         //画出能力线
         drawAbilityLine(canvas);
 
+        //画出文字
+        drawAbilityText(canvas);
+
+
+    }
+
+    private void drawAbilityText(Canvas canvas) {
+        canvas.save();
+
+        ArrayList<PointF> textPoints = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            float r = R + dp2pxF(getContext(), 15f);
+            float x = (float) (r * Math.cos(i * angle - Math.PI / 2));
+            float y = (float) (r * Math.sin(i * angle - Math.PI / 2));
+            textPoints.add(new PointF(x, y));
+        }
+        //拿到字体测量器
+        Paint.FontMetrics metrics = textPaint.getFontMetrics();
+        for (int i = 0; i < n; i++) {
+            float x = textPoints.get(i).x;
+            //ascent:上坡度，是文字的基线到文字的最高处的距离
+            //descent:下坡度,，文字的基线到文字的最低处的距离
+            float y = textPoints.get(i).y - (metrics.ascent + metrics.descent) / 2;
+            canvas.drawText(allAbility[i] + "", x, y, textPaint);
+        }
+        canvas.restore();
     }
 
     /**
@@ -172,7 +201,7 @@ public class AibilitysView extends View {
         //先把能力点初始化出来
         abilityPoints = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            float r = R * (allAbility[i] / 100.0f);  //能力值/100再乘以半径就是所占的比例
+            float r = R * (Float.valueOf("" + allAbility[i]) / 100.0f);  //能力值/100再乘以半径就是所占的比例
             float x = (float) (r * Math.cos(i * angle - Math.PI / 2));
             float y = (float) (r * Math.sin(i * angle - Math.PI / 2));
             abilityPoints.add(new PointF(x, y));
@@ -298,7 +327,7 @@ public class AibilitysView extends View {
      *
      * @param data
      */
-    public void setData(int[] data) {
+    public void setData(Object[] data) {
         if (data == null) {
             return;
         }
